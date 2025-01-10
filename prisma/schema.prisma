@@ -1,0 +1,53 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Flashcard {
+  id          String   @id @default(cuid())
+  character   String   // The kanji/kana character(s)
+  onyomi      String?  // Chinese-derived reading (for kanji only)
+  kunyomi     String?  // Japanese-derived reading (for kanji only)
+  meaning     String   // English meaning
+  type        CardType // Kanji, Hiragana, or Katakana
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  reviews     Review[]
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id])
+  flashcardId String
+  result      ReviewResult
+  readingType ReadingType? // Track which reading was tested
+  reviewedAt  DateTime @default(now())
+  nextReview  DateTime // When to show this card again
+}
+
+enum CardType {
+  KANJI
+  HIRAGANA
+  KATAKANA
+}
+
+enum ReadingType {
+  ONYOMI
+  KUNYOMI
+  KANA     // for hiragana/katakana
+}
+
+enum ReviewResult {
+  EASY
+  GOOD
+  HARD
+  AGAIN
+}
