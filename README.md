@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Japanese Learning App
+
+A modern Japanese language learning application built with Next.js 14, focusing on kanji flashcards with spaced repetition.
+
+## Features
+- Kanji flashcards with onyomi and kunyomi readings
+- Spaced repetition system for efficient learning
+- Modern, responsive UI
+- TypeScript for type safety
+- Prisma ORM for database management
+
+## Tech Stack
+- Next.js 14 (App Router)
+- TypeScript
+- Prisma
+- Tailwind CSS
+- SQLite (development)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 20+
+- npm
+- VSCode (recommended)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### VSCode Setup
+1. Install recommended extensions:
+   - Tailwind CSS IntelliSense
+   - Prisma
+   - ESLint
+   - TypeScript Support
+
+2. Add VSCode settings for Tailwind:
+```json
+// .vscode/settings.json
+{
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation Steps
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone and install dependencies:
+```bash
+# Clone the repo
+git clone [your-repo-url]
+cd japanese-learning-app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Install dependencies
+npm install
+```
 
-## Learn More
+2. Set up environment:
+```bash
+# Create .env file
+DATABASE_URL="file:./dev.db"
+```
 
-To learn more about Next.js, take a look at the following resources:
+3. Set up database:
+```bash
+# Generate Prisma client
+npx prisma generate
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Push schema to database
+npx prisma db push
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Seed initial data
+npm run seed
+```
 
-## Deploy on Vercel
+4. Start dev server:
+```bash
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Visit http://localhost:3000 to see the app.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Database Management
+- View database: `npx prisma studio`
+- Reset database: `npm run seed`
+- Database URL: File-based SQLite at `./dev.db`
+
+### Troubleshooting
+1. If Tailwind isn't working:
+   - Verify VSCode settings
+   - Restart VSCode after configuration
+   
+2. If database seeding fails:
+   - Check .env file exists
+   - Delete dev.db and retry prisma db push
+   - Ensure you're in the right directory
+
+## Project Structure
+```
+japanese-learning-app/
+├── app/                  # Next.js 14 app directory
+│   ├── lib/             # Utility functions and database client
+│   └── services/        # Business logic and data services
+├── prisma/              # Database schema and migrations
+│   ├── schema.prisma    # Database schema
+│   └── seed.ts         # Seed data script
+└── README.md           # This file
+```
+
+## Contributing
+This project is for demonstration purposes.
