@@ -1,33 +1,75 @@
 import { prisma } from '../lib/db'
-import type { Flashcard, Review, ReadingType } from '@prisma/client'
+import type { Flashcard, Review, ReadingType, ReviewResult } from '@prisma/client'
 
 export class FlashcardService {
-  // Get a flashcard due for review
-  static async getNextFlashcard(): Promise<Flashcard | null> {
+  // Get next card due for review
+  static async getNextDueCard(): Promise<Flashcard | null> {
     return await prisma.flashcard.findFirst({
       where: {
-        reviews: {
-          every: {
-            nextReview: {
-              lte: new Date(),
-            },
+        OR: [
+          // Cards that have never been reviewed
+          {
+            reviews: {
+              none: {}
+            }
           },
-        },
+          // Cards due for review
+          {
+            reviews: {
+              some: {
+                nextReview: {
+                  lte: new Date()
+                }
+              }
+            }
+          }
+        ]
       },
       include: {
-        reviews: true,
-      },
+        reviews: {
+          orderBy: {
+            reviewedAt: 'desc'
+          },
+          take: 1
+        }
+      }
     })
   }
 
-  // Create a new review for a flashcard
+  // Calculate next review time based on SRS algorithm
+  private static calculateNextReview(result: ReviewResult, previousInterval?: number): Date {
+    const now = new Date()
+    const ONE_HOUR = 60 * 60 * 1000
+    const ONE_DAY = 24 * ONE_HOUR
+
+    // Base intervals for each result type
+    const intervals = {
+      AGAIN: ONE_HOUR,
+      HARD: previousInterval ? previousInterval * 1.2 : ONE_DAY,
+      GOOD: previousInterval ? previousInterval * 2 : 3 * ONE_DAY,
+      EASY: previousInterval ? previousInterval * 3 : 7 * ONE_DAY,
+    }
+
+    return new Date(now.getTime() + intervals[result])
+  }
+
+  // Create a new review
   static async createReview(
     flashcardId: string,
-    result: Review['result'],
+    result: ReviewResult,
     readingType: ReadingType
   ): Promise<Review> {
-    // Calculate next review date based on result
-    const nextReview = this.calculateNextReview(result)
+    // Get the most recent review for this card
+    const previousReview = await prisma.review.findFirst({
+      where: { flashcardId },
+      orderBy: { reviewedAt: 'desc' }
+    })
+
+    const previousInterval = previousReview 
+      ? previousReview.nextReview.getTime() - previousReview.reviewedAt.getTime()
+      : undefined
+
+    const nextReview = this.calculateNextReview(result, previousInterval)
 
     return await prisma.review.create({
       data: {
@@ -35,40 +77,16 @@ export class FlashcardService {
         result,
         readingType,
         nextReview,
-      },
+      }
     })
   }
 
-  // Helper function to calculate spaced repetition intervals
-  private static calculateNextReview(result: Review['result']): Date {
-    const now = new Date()
-    switch (result) {
-      case 'AGAIN':
-        return new Date(now.getTime() + 1000 * 60 * 10) // 10 minutes
-      case 'HARD':
-        return new Date(now.getTime() + 1000 * 60 * 60) // 1 hour
-      case 'GOOD':
-        return new Date(now.getTime() + 1000 * 60 * 60 * 24) // 1 day
-      case 'EASY':
-        return new Date(now.getTime() + 1000 * 60 * 60 * 24 * 3) // 3 days
-      default:
-        return new Date(now.getTime() + 1000 * 60 * 60 * 24) // Default to 1 day
-    }
-  }
-
-  // Add methods for creating and managing flashcards
-  static async createFlashcard(data: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) {
-    return await prisma.flashcard.create({
-      data,
-    })
-  }
-
-  // Get all flashcards for admin/management purposes
+  // Get all flashcards (for admin/testing)
   static async getAllFlashcards() {
     return await prisma.flashcard.findMany({
       include: {
-        reviews: true,
-      },
+        reviews: true
+      }
     })
   }
 }
