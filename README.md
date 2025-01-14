@@ -1,98 +1,77 @@
 # Japanese Learning App
 
-A modern Japanese language learning application built with Next.js 14, focusing on kanji flashcards with spaced repetition.
+A modern Japanese language learning application built with Next.js 14, featuring flashcards with spaced repetition.
 
 ## Features
 - Interactive kanji flashcards with smooth 3D flip animations
-- Dark theme modern UI
-- Onyomi and kunyomi readings display
-- Review difficulty rating system
+- Shows both onyomi (音読み) and kunyomi (訓読み) readings
 - Spaced repetition system for efficient learning
-- TypeScript for type safety
-- Prisma ORM for database management
+- Dark theme modern UI
+- Built with TypeScript for type safety
 
 ## Tech Stack
-- Next.js 14 (App Router)
+- Next.js 14 with App Router
 - TypeScript
-- Prisma
+- Prisma ORM
 - Tailwind CSS
-- SQLite (development)
+- SQLite
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 20+
+- Node.js 20+ installed
 - npm
 
-### Installation
+### Installation & Setup
 ```bash
 # Clone the repository
-git clone https://github.com/christopherdunkley/japanese-learning-app
+git clone https://github.com/christopherdunkley/japanese-learning-app.git
 cd japanese-learning-app
 
 # Install dependencies
 npm install
 
-# Set up database
+# Set up the database
 npx prisma generate
 npx prisma db push
 
-# Seed initial data
-npm run seed
-```
-
-### Environment Setup
-1. Create `.env` file in root:
-```
-DATABASE_URL="file:./dev.db"
-```
-
-2. Create `.vscode/settings.json`:
-```json
-{
-  "files.associations": {
-    "*.css": "tailwindcss"
-  }
-}
-```
-
-### Running the Application
-```bash
+# Start the development server
 npm run dev
 ```
 
-Visit http://localhost:3000/study to see the flashcard interface.
+Visit http://localhost:3000/study to see the application.
 
-### Troubleshooting
-1. If CSS animations aren't working:
-   - Ensure all required CSS utility classes are in globals.css
-   - Check browser console for any CSS-related errors
-   - Try a hard refresh (Ctrl+F5) if styles aren't updating
+### Database Management
+You can manage the database using Prisma Studio:
+```bash
+npx prisma studio
+```
 
-2. If database isn't working:
-   - Check .env file exists w/ correct DATABASE_URL
-   - Try removing dev.db and running prisma db push again
-   - ensure seed data is loaded w/ npm run seed
+This opens a GUI at http://localhost:5555 where you can:
+- View all flashcards
+- Delete reviews to reset spaced repetition progress
+- Add new flashcards
+- Modify existing data
 
-3. If page isn't loading:
-   - Ensure you're visiting /study route, not just /
-   - Check console for any TypeScript/React errors
-   - Verify all components are properly exported/imported
+### Managing Reviews
+To reset your learning progress:
+1. Open Prisma Studio (`npx prisma studio`)
+2. Click on the "Review" table
+3. Select all reviews
+4. Click "Delete records" to start fresh
 
 ## Project Structure
 ```
 japanese-learning-app/
 ├── app/
-│   ├── lib/             # Utility functions and database client
-│   ├── components/      # React components including flashcards
-│   ├── services/        # Business logic and data services
-│   └── study/          # Study interface pages
-├── prisma/              # Database schema and migrations
-├── public/             # Static assets
-└── README.md          # This file
+│   ├── api/              # API routes
+│   ├── components/       # React components
+│   │   ├── flashcards/   # Flashcard components
+│   │   └── study/       # Study interface
+│   └── study/           # Study page
+├── prisma/              # Database schema
+└── README.md
 ```
 
 ## Contributing
-```
 This project is for demonstration purposes.
-```
