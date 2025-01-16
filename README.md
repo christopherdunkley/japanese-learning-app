@@ -1,11 +1,14 @@
 # Japanese Learning App
 
-A modern Japanese language learning application built with Next.js 14, featuring flashcards with spaced repetition.
+A modern Japanese learning application built with Next.js 14, featuring interactive kanji flashcards and spaced repetition.
 
 ## Features
-- Interactive kanji flashcards with smooth 3D flip animations
+- Interactive kanji flashcards w/ smooth 3D flip animations
 - Shows both onyomi (音読み) and kunyomi (訓読み) readings
-- Spaced repetition system for efficient learning
+- Spaced repetition system (SRS) for efficient learning
+- Progress tracking w/ visual indicators
+- Session statistics and learning analytics
+- End-of-session performance summary
 - Dark theme modern UI
 - Built with TypeScript for type safety
 
@@ -35,30 +38,50 @@ npm install
 npx prisma generate
 npx prisma db push
 
+# Populate database with kanji cards
+npm run seed
+
 # Start the development server
 npm run dev
 ```
 
 Visit http://localhost:3000/study to see the application.
 
-### Database Management
+### Managing Flashcards
+
+#### Viewing and Managing Data
 You can manage the database using Prisma Studio:
 ```bash
 npx prisma studio
 ```
-
 This opens a GUI at http://localhost:5555 where you can:
 - View all flashcards
-- Delete reviews to reset spaced repetition progress
-- Add new flashcards
+- Delete reviews to reset learning progress
+- Add new flashcards manually
 - Modify existing data
 
-### Managing Reviews
-To reset your learning progress:
-1. Open Prisma Studio (`npx prisma studio`)
-2. Click on the "Review" table
-3. Select all reviews
-4. Click "Delete records" to start fresh
+#### Adding More Flashcards
+1. Navigate to `prisma/seed.ts`
+2. Add new kanji to the `kanji` array, following this format:
+```typescript
+{
+  character: '日',
+  onyomi: 'ニチ、ジツ',
+  kunyomi: 'ひ、-び、-か',
+  meaning: 'day, sun',
+  type: CardType.KANJI,
+}
+```
+3. Run `npm run seed` to reset the database with the new cards
+
+CAUTION: Running `npm run seed` will clear all existing review data and recreate the flashcard deck.
+
+### Study Interface
+- Click cards to flip between kanji / readings
+- Rate your recall: Again, Hard, Good or Easy
+- Progress bar shows completion of current session
+- View statistics after completing all due reviews
+- Start a new session anytime
 
 ## Project Structure
 ```
@@ -69,7 +92,9 @@ japanese-learning-app/
 │   │   ├── flashcards/   # Flashcard components
 │   │   └── study/       # Study interface
 │   └── study/           # Study page
-├── prisma/              # Database schema
+├── prisma/
+│   ├── schema.prisma    # Database schema
+│   └── seed.ts         # Seed data for flashcards
 └── README.md
 ```
 
