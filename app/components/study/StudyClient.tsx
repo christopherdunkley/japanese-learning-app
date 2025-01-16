@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Flashcard } from '../flashcards/Flashcard'
+import { StudyStats } from './StudyStats'
 import type { Flashcard as FlashcardType } from '@prisma/client'
 
 interface StudyClientProps {
@@ -12,12 +13,12 @@ export function StudyClient({ initialFlashcard }: StudyClientProps) {
   const [currentCard, setCurrentCard] = useState<FlashcardType | null>(initialFlashcard)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
+  const [sessionStartTime] = useState(new Date())  // Track when the session started
 
   const handleResult = async (result: 'EASY' | 'GOOD' | 'HARD' | 'AGAIN') => {
     try {
       setIsLoading(true)
       
-      // Submit the review
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: {
@@ -34,11 +35,9 @@ export function StudyClient({ initialFlashcard }: StudyClientProps) {
         throw new Error('Failed to submit review')
       }
 
-      // Fetch the next card
       const nextCardResponse = await fetch('/api/flashcards/next')
       
       if (nextCardResponse.status === 404) {
-        // No more cards due for review
         setCurrentCard(null)
         setIsDone(true)
         return
@@ -61,11 +60,11 @@ export function StudyClient({ initialFlashcard }: StudyClientProps) {
   if (isDone) {
     return (
       <div className="text-center text-gray-200">
-        <h2 className="text-xl font-bold mb-4">All Done! 🎉</h2>
-        <p>You have reviewed all cards that are currently due.</p>
+        <h2 className="text-xl font-bold mb-4">Session Complete! 🎉</h2>
+        <StudyStats sessionStartTime={sessionStartTime} showOverall={true} />
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+          className="mt-8 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
         >
           Start New Session
         </button>
@@ -78,12 +77,14 @@ export function StudyClient({ initialFlashcard }: StudyClientProps) {
   }
 
   return (
-    <Flashcard
-      character={currentCard.character}
-      onyomi={currentCard.onyomi}
-      kunyomi={currentCard.kunyomi}
-      meaning={currentCard.meaning}
-      onResult={handleResult}
-    />
+    <div className="space-y-8">
+      <Flashcard
+        character={currentCard.character}
+        onyomi={currentCard.onyomi}
+        kunyomi={currentCard.kunyomi}
+        meaning={currentCard.meaning}
+        onResult={handleResult}
+      />
+    </div>
   )
 }
