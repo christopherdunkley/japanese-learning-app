@@ -69,7 +69,12 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
           <h2 className="text-xl font-bold mb-4">Session Complete! 🎉</h2>
           <StudyStats sessionStartTime={sessionStartTime} showOverall={true} />
           <button 
-            onClick={() => window.location.reload()}
+            onClick={(e) => {
+              e.preventDefault();
+              if (window.confirm('Are you sure you want to start a new session? Your current session stats will be lost.')) {
+                window.location.reload();
+              }
+            }}
             className="mt-8 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
           >
             Start New Session

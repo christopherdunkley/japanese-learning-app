@@ -1,24 +1,48 @@
 import { NextResponse } from 'next/server'
-import { FlashcardService } from '@/services/flashcard.service'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    const nextCard = await FlashcardService.getNextDueCard()
-    
-    if (!nextCard) {
-      // If no cards are due, return 404
+    const flashcard = await prisma.flashcard.findFirst({
+      where: {
+        OR: [
+          {
+            // Cards with no reviews
+            reviews: {
+              none: {}
+            }
+          },
+          {
+            // Cards that are due for review
+            reviews: {
+              some: {
+                nextReview: {
+                  lte: new Date()
+                }
+              }
+            }
+          }
+        ]
+      },
+      orderBy: {
+        reviews: {
+          _count: 'asc'
+        }
+      }
+    })
+
+    if (!flashcard) {
       return NextResponse.json(
-        { message: "No cards due for review" },
+        { message: 'No cards due for review' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(nextCard)
+    return NextResponse.json(flashcard)
   } catch (error) {
-    console.error('Error fetching next card:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch next card' },
-      { status: 500 }
-    )
+    console.error('Error:', error)
+    return NextResponse.json({ error: 'Failed to fetch next flashcard' }, { status: 500 })
   }
 }
