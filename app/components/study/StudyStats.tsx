@@ -1,24 +1,50 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import type { SessionStats, OverallStats } from '@/services/stats.service'
+import { useState, useEffect } from 'react'
 
 interface StudyStatsProps {
-  sessionStartTime: Date
-  showOverall?: boolean
+  sessionId: string | null;
+  showOverall?: boolean;
 }
 
-export function StudyStats({ sessionStartTime, showOverall = false }: StudyStatsProps) {
+interface SessionStats {
+  totalCards: number;
+  results: {
+    AGAIN: number;
+    HARD: number;
+    GOOD: number;
+    EASY: number;
+  };
+  reviewCount: number;
+}
+
+interface OverallStats {
+  totalCards: number;
+  cardsLearned: number;
+  bestStreak: number;
+  currentStreak: number;
+}
+
+export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) {
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null)
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const sessionRes = await fetch(`/api/stats/session?startTime=${sessionStartTime.toISOString()}`)
-        const sessionData = await sessionRes.json()
-        setSessionStats(sessionData)
-
+        // Add a small delay to ensure session completion
+        await new Promise(resolve => setTimeout(resolve, 500));
+  
+        if (sessionId) {
+          const sessionRes = await fetch(`/api/sessions/${sessionId}`)
+          const sessionData = await sessionRes.json()
+          setSessionStats({
+            totalCards: sessionData.totalCards,
+            results: sessionData.results,
+            reviewCount: sessionData.reviewCount
+          })
+        }
+  
         if (showOverall) {
           const overallRes = await fetch('/api/stats/overall')
           const overallData = await overallRes.json()
@@ -28,9 +54,9 @@ export function StudyStats({ sessionStartTime, showOverall = false }: StudyStats
         console.error('Error fetching stats:', error)
       }
     }
-
+  
     fetchStats()
-  }, [sessionStartTime, showOverall])
+  }, [sessionId, showOverall])
 
   if (!sessionStats) return null
 
@@ -40,18 +66,28 @@ export function StudyStats({ sessionStartTime, showOverall = false }: StudyStats
       <div className="flex justify-center">
         <div className="bg-gray-800 p-4 rounded-lg w-64">
           <h3 className="text-gray-400 text-sm">Reviews Today</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.totalReviewed}</p>
+          <p className="text-2xl font-bold text-white">{sessionStats.reviewCount}</p>
         </div>
       </div>
 
       {/* Review Results Row */}
       <div className="grid grid-cols-4 gap-4">
-        {Object.entries(sessionStats.results).map(([result, count]) => (
-          <div key={result} className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">{result}</h3>
-            <p className="text-2xl font-bold text-white">{count}</p>
-          </div>
-        ))}
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">AGAIN</h3>
+          <p className="text-2xl font-bold text-white">{sessionStats.results.AGAIN}</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">HARD</h3>
+          <p className="text-2xl font-bold text-white">{sessionStats.results.HARD}</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">GOOD</h3>
+          <p className="text-2xl font-bold text-white">{sessionStats.results.GOOD}</p>
+        </div>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <h3 className="text-gray-400 text-sm">EASY</h3>
+          <p className="text-2xl font-bold text-white">{sessionStats.results.EASY}</p>
+        </div>
       </div>
 
       {/* Overall Stats Row */}
