@@ -11,6 +11,11 @@ A modern Japanese learning application built with Next.js 14, featuring interact
 - End-of-session performance summary
 - Dark theme modern UI
 - Built with TypeScript for type safety
+- Comprehensive session statistics including:
+  - Cards reviewed per session
+  - Review quality tracking (Again/Hard/Good/Easy)
+  - Current and best streaks
+  - Session completion summaries
 
 ## Tech Stack
 - Next.js 14 with App Router
@@ -82,6 +87,20 @@ CAUTION: Running `npm run seed` will clear all existing review data and recreate
 - Progress bar shows completion of current session
 - View statistics after completing all due reviews
 - Start a new session anytime
+- End of session statistics show:
+  - Total cards reviewed
+  - Review quality distribution
+  - Learning streaks
+  - Overall progress
+
+### Statistics Tracking
+The app tracks various metrics to help monitor your learning:
+- **Cards Learned**: Number of unique cards reviewed in current session
+- **Review Quality**: Distribution of Again/Hard/Good/Easy ratings
+- **Best Streak**: Highest consecutive Good/Easy ratings
+- **Current Streak**: Recent consecutive Good/Easy ratings
+
+Review data persists between sessions, allowing you to track your progress over time.
 
 ## Project Structure
 ```
