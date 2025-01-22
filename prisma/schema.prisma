@@ -24,13 +24,24 @@ model Flashcard {
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  flashcard   Flashcard @relation(fields: [flashcardId], references: [id])
+  id          String      @id @default(cuid())
+  flashcard   Flashcard   @relation(fields: [flashcardId], references: [id])
   flashcardId String
   result      ReviewResult
-  readingType ReadingType? // Track which reading was tested
-  reviewedAt  DateTime @default(now())
-  nextReview  DateTime // When to show this card again
+  readingType ReadingType
+  reviewedAt  DateTime    @default(now())
+  nextReview  DateTime
+  session     Session?    @relation(fields: [sessionId], references: [id])
+  sessionId   String?
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  totalCards  Int
+  results     Json     // Will store counts of AGAIN/HARD/GOOD/EASY
+  reviews     Review[]
 }
 
 enum CardType {

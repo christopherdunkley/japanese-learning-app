@@ -5,32 +5,55 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   try {
+    // Total number of flashcards in database
     const totalCards = await prisma.flashcard.count()
-    const cardsLearned = await prisma.flashcard.count({
+
+    // Get the most recently completed session
+    const lastSession = await prisma.session.findFirst({
       where: {
-        reviews: {
-          some: {}
+        endedAt: {
+          not: null
         }
+      },
+      include: {
+        reviews: {
+          orderBy: {
+            reviewedAt: 'desc'
+          }
+        }
+      },
+      orderBy: {
+        endedAt: 'desc'
       }
     })
 
-    const cardsMastered = await prisma.flashcard.count({
-      where: {
-        reviews: {
-          some: {
-            result: {
-              in: ['GOOD', 'EASY']
-            }
-          }
+    // Cards learned is the unique cards reviewed in this session
+    const cardsLearned = lastSession 
+      ? new Set(lastSession.reviews.map(r => r.flashcardId)).size 
+      : 0
+
+    // Calculate streak from session's reviews
+    let currentStreak = 0
+    let bestStreak = 0
+    let tempStreak = 0
+
+    if (lastSession?.reviews) {
+      lastSession.reviews.reverse().forEach(review => {  // Process in chronological order
+        if (review.result === 'GOOD' || review.result === 'EASY') {
+          tempStreak++
+          currentStreak = tempStreak
+          bestStreak = Math.max(bestStreak, tempStreak)
+        } else {
+          tempStreak = 0
         }
-      }
-    })
+      })
+    }
 
     return NextResponse.json({
       totalCards,
       cardsLearned,
-      bestStreak: cardsMastered,
-      currentStreak: cardsMastered
+      bestStreak,
+      currentStreak
     })
   } catch (error) {
     console.error('Error fetching overall stats:', error)

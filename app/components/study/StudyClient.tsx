@@ -8,15 +8,42 @@ import type { Flashcard as FlashcardType } from '@prisma/client'
 
 interface StudyClientProps {
   initialFlashcard: FlashcardType
-  totalDueCards: number  // Add this prop
+  totalDueCards: number
 }
 
 export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProps) {
   const [currentCard, setCurrentCard] = useState<FlashcardType | null>(initialFlashcard)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
-  const [sessionStartTime] = useState(new Date())
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [cardsReviewed, setCardsReviewed] = useState(0)
+
+  // Create session when component mounts
+  const createSession = async () => {
+    try {
+      const response = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          totalCards: totalDueCards,
+        }),
+      })
+      
+      if (!response.ok) throw new Error('Failed to create session')
+      
+      const data = await response.json()
+      setSessionId(data.id)
+    } catch (error) {
+      console.error('Error creating session:', error)
+    }
+  }
+
+  // Initialise session if we don't have one
+  if (!sessionId && !isDone) {
+    createSession()
+  }
 
   const handleResult = async (result: 'EASY' | 'GOOD' | 'HARD' | 'AGAIN') => {
     try {
@@ -32,6 +59,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
           flashcardId: currentCard?.id,
           result,
           readingType: 'ONYOMI',
+          sessionId,
         }),
       })
 
@@ -42,6 +70,21 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
       const nextCardResponse = await fetch('/api/flashcards/next')
       
       if (nextCardResponse.status === 404) {
+        // Complete the session when done
+        if (sessionId) {
+          const completeResponse = await fetch(`/api/sessions/${sessionId}/complete`, {
+            method: 'POST',
+          });
+          
+          if (!completeResponse.ok) {
+            const errorText = await completeResponse.text();
+            console.error('Session completion failed:', errorText);
+            throw new Error('Failed to complete session');
+          }
+          
+          const completeData = await completeResponse.json();
+          console.log('Session completed:', completeData);
+        }
         setCurrentCard(null)
         setIsDone(true)
         return
@@ -55,7 +98,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
     } finally {
       setIsLoading(false)
     }
-  }
+}
 
   return (
     <div className="space-y-8">
@@ -67,7 +110,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
       ) : isDone ? (
         <div className="text-center text-gray-200">
           <h2 className="text-xl font-bold mb-4">Session Complete! 🎉</h2>
-          <StudyStats sessionStartTime={sessionStartTime} showOverall={true} />
+          <StudyStats sessionId={sessionId} showOverall={true} />
           <button 
             onClick={(e) => {
               e.preventDefault();

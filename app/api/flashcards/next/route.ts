@@ -5,7 +5,8 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    const flashcard = await prisma.flashcard.findFirst({
+    // First try to find any unreviewed cards
+    const nextCard = await prisma.flashcard.findFirst({
       where: {
         OR: [
           {
@@ -15,7 +16,7 @@ export async function GET() {
             }
           },
           {
-            // Cards that are due for review
+            // Cards due for review
             reviews: {
               some: {
                 nextReview: {
@@ -25,24 +26,22 @@ export async function GET() {
             }
           }
         ]
-      },
-      orderBy: {
-        reviews: {
-          _count: 'asc'
-        }
       }
     })
 
-    if (!flashcard) {
+    if (!nextCard) {
       return NextResponse.json(
-        { message: 'No cards due for review' },
+        { message: "No more cards due for review" },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(flashcard)
+    return NextResponse.json(nextCard)
   } catch (error) {
     console.error('Error:', error)
-    return NextResponse.json({ error: 'Failed to fetch next flashcard' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch next card' },
+      { status: 500 }
+    )
   }
 }
