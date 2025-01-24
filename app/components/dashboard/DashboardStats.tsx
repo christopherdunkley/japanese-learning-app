@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 interface Stats {
   totalCards: number
@@ -12,6 +13,7 @@ interface Stats {
 export function DashboardStats() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [dueCount, setDueCount] = useState(0)
 
   useEffect(() => {
     async function fetchStats() {
@@ -27,7 +29,14 @@ export function DashboardStats() {
       }
     }
 
+    async function fetchDueCount() {
+      const res = await fetch('/api/stats/due-count')
+      const data = await res.json()
+      setDueCount(data.count)
+    }
+
     fetchStats()
+    fetchDueCount()
   }, [])
 
   if (isLoading) {
@@ -56,11 +65,11 @@ export function DashboardStats() {
       
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Total Cards</p>
+          <p className="text-sm text-gray-400">Total Cards Studied</p>
           <p className="text-2xl font-bold">{stats.totalCards}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Cards Learned</p>
+          <p className="text-sm text-gray-400">Cards Studied in Last Session</p>
           <p className="text-2xl font-bold">{stats.cardsLearned}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
@@ -72,6 +81,13 @@ export function DashboardStats() {
           <p className="text-2xl font-bold">{stats.currentStreak}</p>
         </div>
       </div>
+
+      <Link
+        href="/study"
+        className="mt-4 w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+      >
+        Start Studying ({dueCount}) →
+      </Link>
     </div>
   )
 }
