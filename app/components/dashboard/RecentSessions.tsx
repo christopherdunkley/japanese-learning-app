@@ -59,8 +59,9 @@ export function RecentSessions() {
 
   return (
     <div className="bg-gray-800 rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Recent Study Sessions</h2>
-      <div className="space-y-4">
+        <h2 className="text-xl font-semibold mb-4">Recent Study Sessions</h2>
+    <div className="h-[400px] overflow-y-auto pr-2"> {/* Added fixed height and scroll */}
+    <div className="space-y-4">
         {sessions.map((session) => (
           <div key={session.id} className="bg-gray-700 p-4 rounded-lg">
             <div className="flex justify-between items-start mb-2">
@@ -103,9 +104,9 @@ export function RecentSessions() {
                 <p>{session.results.EASY}</p>
               </div>
             </div>
-          </div>
-        ))}
+            </div>
+      ))}
       </div>
     </div>
-  )
-}
+  </div>
+)}

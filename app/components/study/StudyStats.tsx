@@ -65,7 +65,7 @@ export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) 
       {/* Today's Reviews - Single centered card */}
       <div className="flex justify-center">
         <div className="bg-gray-800 p-4 rounded-lg w-64">
-          <h3 className="text-gray-400 text-sm">Reviews Today</h3>
+          <h3 className="text-gray-400 text-sm">Reviews This Session</h3>
           <p className="text-2xl font-bold text-white">{sessionStats.reviewCount}</p>
         </div>
       </div>
