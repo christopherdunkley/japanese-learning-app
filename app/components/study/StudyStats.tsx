@@ -69,14 +69,6 @@ export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) 
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Today's Reviews - Single centered card */}
-      <div className="flex justify-center">
-        <div className="bg-gray-800 p-4 rounded-lg w-64">
-          <h3 className="text-gray-400 text-sm">Reviews This Session</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.reviewCount}</p>
-        </div>
-      </div>
-
       {/* Review Results Row */}
       <div className="grid grid-cols-4 gap-4">
         {Object.entries(sessionStats.results).map(([key, value]) => (
@@ -94,19 +86,19 @@ export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) 
       {overallStats && (
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Total Cards Learned</h3>
+            <h3 className="text-gray-400 text-sm">Total Cards Encountered</h3>
             <p className="text-2xl font-bold text-white">{overallStats.totalCards}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Cards Learned this Session</h3>
+            <h3 className="text-gray-400 text-sm">Cards Studied This Session</h3>
             <p className="text-2xl font-bold text-white">{overallStats.cardsLearned}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Best Streak</h3>
+            <h3 className="text-gray-400 text-sm">Best Good/Easy Streak</h3>
             <p className="text-2xl font-bold text-white">{overallStats.bestStreak}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Current Streak</h3>
+            <h3 className="text-gray-400 text-sm">Current Good/Easy Streak</h3>
             <p className="text-2xl font-bold text-white">{overallStats.currentStreak}</p>
           </div>
         </div>
