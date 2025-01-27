@@ -28,40 +28,47 @@ interface OverallStats {
 export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) {
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null)
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Add a small delay to ensure session completion
-        await new Promise(resolve => setTimeout(resolve, 500));
-  
         if (sessionId) {
-          const sessionRes = await fetch(`/api/sessions/${sessionId}`)
-          const sessionData = await sessionRes.json()
+          const [sessionData, overallData] = await Promise.all([
+            fetch(`/api/sessions/${sessionId}`).then(res => res.json()),
+            showOverall ? fetch('/api/stats/overall').then(res => res.json()) : null
+          ])
+
           setSessionStats({
             totalCards: sessionData.totalCards,
             results: sessionData.results,
             reviewCount: sessionData.reviewCount
           })
-        }
-  
-        if (showOverall) {
-          const overallRes = await fetch('/api/stats/overall')
-          const overallData = await overallRes.json()
-          setOverallStats(overallData)
+
+          if (overallData) {
+            setOverallStats(overallData)
+          }
         }
       } catch (error) {
         console.error('Error fetching stats:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
   
-    fetchStats()
+    if (sessionId) {
+      fetchStats()
+    }
   }, [sessionId, showOverall])
 
-  if (!sessionStats) return null
+  if (isLoading || !sessionStats) return (
+    <div className="flex justify-center items-center h-48">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Today's Reviews - Single centered card */}
       <div className="flex justify-center">
         <div className="bg-gray-800 p-4 rounded-lg w-64">
@@ -72,33 +79,26 @@ export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) 
 
       {/* Review Results Row */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">AGAIN</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.results.AGAIN}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">HARD</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.results.HARD}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">GOOD</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.results.GOOD}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-gray-400 text-sm">EASY</h3>
-          <p className="text-2xl font-bold text-white">{sessionStats.results.EASY}</p>
-        </div>
+        {Object.entries(sessionStats.results).map(([key, value]) => (
+          <div 
+            key={key} 
+            className="bg-gray-800 p-4 rounded-lg"
+          >
+            <h3 className="text-gray-400 text-sm">{key}</h3>
+            <p className="text-2xl font-bold text-white">{value}</p>
+          </div>
+        ))}
       </div>
 
       {/* Overall Stats Row */}
       {overallStats && (
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Total Cards</h3>
+            <h3 className="text-gray-400 text-sm">Total Cards Learned</h3>
             <p className="text-2xl font-bold text-white">{overallStats.totalCards}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Cards Learned</h3>
+            <h3 className="text-gray-400 text-sm">Cards Learned this Session</h3>
             <p className="text-2xl font-bold text-white">{overallStats.cardsLearned}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
