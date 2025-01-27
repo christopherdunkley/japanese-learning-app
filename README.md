@@ -50,7 +50,7 @@ npm run seed
 npm run dev
 ```
 
-Visit http://localhost:3000/study to see the application.
+Visit http://localhost:3000/ to see the application.
 
 ### Managing Flashcards
 
@@ -82,8 +82,20 @@ This opens a GUI at http://localhost:5555 where you can:
 CAUTION: Running `npm run seed` will clear all existing review data and recreate the flashcard deck.
 
 ### Study Interface
-- Click cards to flip between kanji / readings
-- Rate your recall: Again, Hard, Good or Easy
+- Click cards or press spacebar to flip between kanji / readings
+- Rate your recall using keyboard shortcuts or buttons:
+  - 1 or click "Again" - Don't remember at all (review in 1 hour)
+  - 2 or click "Hard" - Remembered with difficulty (current interval × 1.2)
+  - 3 or click "Good" - Remembered well (current interval × 2.0)
+  - 4 or click "Easy" - Remembered easily (current interval × 3.0)
+- Initial intervals for new cards:
+  - Again: 1 hour
+  - Hard: 1 day
+  - Good: 3 days
+  - Easy: 7 days
+- Each subsequent review multiplies the previous interval:
+  - Example: A card reviewed as "Good" after 3 days will next appear in 6 days
+  - A small random factor (±5%) is applied to prevent cards from clumping together
 - Progress bar shows completion of current session
 - View statistics after completing all due reviews
 - Start a new session anytime
