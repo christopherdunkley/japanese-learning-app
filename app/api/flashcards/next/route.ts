@@ -3,29 +3,60 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // First try to find any unreviewed cards
+    // Get the current session ID from the query params
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('sessionId')
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Session ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Find cards that are due but haven't been reviewed in the current session
     const nextCard = await prisma.flashcard.findFirst({
       where: {
         OR: [
           {
-            // Cards with no reviews
+            // Cards with no reviews at all
             reviews: {
               none: {}
             }
           },
           {
-            // Cards due for review
-            reviews: {
-              some: {
-                nextReview: {
-                  lte: new Date()
+            // Cards due for review but not reviewed in current session
+            AND: [
+              {
+                reviews: {
+                  some: {
+                    nextReview: {
+                      lte: new Date()
+                    }
+                  }
+                }
+              },
+              {
+                // Exclude cards already reviewed in this session
+                reviews: {
+                  none: {
+                    sessionId: sessionId
+                  }
                 }
               }
-            }
+            ]
           }
         ]
+      },
+      include: {
+        reviews: {
+          orderBy: {
+            reviewedAt: 'desc'
+          },
+          take: 1
+        }
       }
     })
 

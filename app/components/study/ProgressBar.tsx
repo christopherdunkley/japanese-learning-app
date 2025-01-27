@@ -6,12 +6,13 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ current, total }: ProgressBarProps) {
-  const percentage = Math.round((current / total) * 100)
+  // Ensure percentage never exceeds 100%
+  const percentage = Math.min(Math.round((current / total) * 100), 100)
   
   return (
     <div className="w-full mt-4">
       <div className="flex justify-between text-sm text-gray-400 mb-2">
-        <span>{current} of {total} cards</span>
+        <span>{Math.min(current, total)} of {total} cards</span>
         <span>{percentage}%</span>
       </div>
       <div className="h-2 bg-gray-700 rounded-full">

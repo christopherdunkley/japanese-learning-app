@@ -50,7 +50,6 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
     
     try {
       setIsLoading(true)
-      setCardsReviewed(prev => prev + 1)
       
       // Submit the review
       const reviewResponse = await fetch('/api/reviews', {
@@ -70,8 +69,14 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
         throw new Error('Failed to submit review')
       }
 
+      // Update cards reviewed count
+      setCardsReviewed(prev => {
+        // Don't allow reviewed count to exceed total due cards
+        return Math.min(prev + 1, totalDueCards)
+      })
+
       // Get next card
-      const nextCardResponse = await fetch('/api/flashcards/next')
+      const nextCardResponse = await fetch(`/api/flashcards/next?sessionId=${sessionId}`)
       
       if (nextCardResponse.status === 404) {
         // Complete the session
