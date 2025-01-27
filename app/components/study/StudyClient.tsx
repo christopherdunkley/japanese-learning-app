@@ -46,45 +46,43 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
   }
 
   const handleResult = async (result: 'EASY' | 'GOOD' | 'HARD' | 'AGAIN') => {
+    if (!currentCard || !sessionId) return
+    
     try {
       setIsLoading(true)
       setCardsReviewed(prev => prev + 1)
       
-      const response = await fetch('/api/reviews', {
+      // Submit the review
+      const reviewResponse = await fetch('/api/reviews', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          flashcardId: currentCard?.id,
+          flashcardId: currentCard.id,
           result,
           readingType: 'ONYOMI',
           sessionId,
         }),
       })
 
-      if (!response.ok) {
+      if (!reviewResponse.ok) {
         throw new Error('Failed to submit review')
       }
 
+      // Get next card
       const nextCardResponse = await fetch('/api/flashcards/next')
       
       if (nextCardResponse.status === 404) {
-        // Complete the session when done
-        if (sessionId) {
-          const completeResponse = await fetch(`/api/sessions/${sessionId}/complete`, {
-            method: 'POST',
-          });
-          
-          if (!completeResponse.ok) {
-            const errorText = await completeResponse.text();
-            console.error('Session completion failed:', errorText);
-            throw new Error('Failed to complete session');
-          }
-          
-          const completeData = await completeResponse.json();
-          console.log('Session completed:', completeData);
+        // Complete the session
+        const completeResponse = await fetch(`/api/sessions/${sessionId}/complete`, {
+          method: 'POST',
+        })
+        
+        if (!completeResponse.ok) {
+          throw new Error('Failed to complete session')
         }
+        
         setCurrentCard(null)
         setIsDone(true)
         return
@@ -98,13 +96,20 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
     } finally {
       setIsLoading(false)
     }
-}
+  }
+
+  const handleStartNewSession = () => {
+    if (window.confirm('Are you sure you want to start a new session? Your current session stats will be lost.')) {
+      window.location.reload()
+    }
+  }
 
   return (
     <div className="space-y-8">
       <div className="mb-8">
         <ProgressBar current={cardsReviewed} total={totalDueCards} />
       </div>
+      
       {isLoading ? (
         <div className="text-center text-gray-400">Loading next card...</div>
       ) : isDone ? (
@@ -112,12 +117,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
           <h2 className="text-xl font-bold mb-4">Session Complete! 🎉</h2>
           <StudyStats sessionId={sessionId} showOverall={true} />
           <button 
-            onClick={(e) => {
-              e.preventDefault();
-              if (window.confirm('Are you sure you want to start a new session? Your current session stats will be lost.')) {
-                window.location.reload();
-              }
-            }}
+            onClick={handleStartNewSession}
             className="mt-8 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
           >
             Start New Session
