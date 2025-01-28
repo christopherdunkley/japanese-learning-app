@@ -65,7 +65,7 @@ export function DashboardStats() {
       
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Total Cards Studied</p>
+          <p className="text-sm text-gray-400">Total Reviews Completed</p>
           <p className="text-2xl font-bold">{stats.totalCards}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
@@ -73,11 +73,11 @@ export function DashboardStats() {
           <p className="text-2xl font-bold">{stats.cardsLearned}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Best Streak</p>
+          <p className="text-sm text-gray-400">Best Good/Easy Streak</p>
           <p className="text-2xl font-bold">{stats.bestStreak}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Current Streak</p>
+          <p className="text-sm text-gray-400">Current Good/Easy Streak</p>
           <p className="text-2xl font-bold">{stats.currentStreak}</p>
         </div>
       </div>

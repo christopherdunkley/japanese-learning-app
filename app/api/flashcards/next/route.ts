@@ -16,40 +16,8 @@ export async function GET(request: Request) {
       )
     }
 
-    // Find cards that are due but haven't been reviewed in the current session
-    const nextCard = await prisma.flashcard.findFirst({
-      where: {
-        OR: [
-          {
-            // Cards with no reviews at all
-            reviews: {
-              none: {}
-            }
-          },
-          {
-            // Cards due for review but not reviewed in current session
-            AND: [
-              {
-                reviews: {
-                  some: {
-                    nextReview: {
-                      lte: new Date()
-                    }
-                  }
-                }
-              },
-              {
-                // Exclude cards already reviewed in this session
-                reviews: {
-                  none: {
-                    sessionId: sessionId
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      },
+    // First get all flashcards with their latest review
+    const cardsWithLatestReview = await prisma.flashcard.findMany({
       include: {
         reviews: {
           orderBy: {
@@ -58,6 +26,21 @@ export async function GET(request: Request) {
           take: 1
         }
       }
+    })
+
+    // Filter to find the first due card that hasn't been reviewed in this session
+    const now = new Date()
+    const nextCard = cardsWithLatestReview.find(card => {
+      // Card hasn't been reviewed in current session
+      const reviewedInSession = card.reviews.some(r => r.sessionId === sessionId)
+      if (reviewedInSession) return false
+
+      // Card has no reviews (is new)
+      if (card.reviews.length === 0) return true
+
+      // Card's latest review is due
+      const latestReview = card.reviews[0]
+      return latestReview.nextReview <= now
     })
 
     if (!nextCard) {
