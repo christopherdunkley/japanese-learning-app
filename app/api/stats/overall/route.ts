@@ -5,8 +5,8 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Total number of flashcards in database
-    const totalCards = await prisma.flashcard.count()
+    // Total number of reviews completed (counting repeated reviews)
+    const totalReviews = await prisma.review.count()
 
     // Get the most recently completed session
     const lastSession = await prisma.session.findFirst({
@@ -27,8 +27,8 @@ export async function GET() {
       }
     })
 
-    // Cards learned is the unique cards reviewed in this session
-    const cardsLearned = lastSession 
+    // Cards studied in last session (unique cards reviewed)
+    const cardsStudied = lastSession 
       ? new Set(lastSession.reviews.map(r => r.flashcardId)).size 
       : 0
 
@@ -50,8 +50,8 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      totalCards,
-      cardsLearned,
+      totalCards: totalReviews,  // total number of reviews (including repeated cards)
+      cardsLearned: cardsStudied,
       bestStreak,
       currentStreak
     })
