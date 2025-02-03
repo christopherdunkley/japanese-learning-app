@@ -4,19 +4,13 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export default async function StudyPage() {
-  const totalDueCards = await prisma.flashcard.count({
+  const now = new Date()
+
+  const dueCount = await prisma.flashcard.count({
     where: {
       OR: [
-        { reviews: { none: {} } },
-        {
-          reviews: {
-            some: {
-              nextReview: {
-                lte: new Date()
-              }
-            }
-          }
-        }
+        { nextReviewAt: null },
+        { nextReviewAt: { lte: now } }
       ]
     }
   })
@@ -24,16 +18,8 @@ export default async function StudyPage() {
   const initialCard = await prisma.flashcard.findFirst({
     where: {
       OR: [
-        { reviews: { none: {} } },
-        {
-          reviews: {
-            some: {
-              nextReview: {
-                lte: new Date()
-              }
-            }
-          }
-        }
+        { nextReviewAt: null },
+        { nextReviewAt: { lte: now } }
       ]
     }
   })
@@ -54,7 +40,7 @@ export default async function StudyPage() {
         <h1 className="text-2xl font-bold text-center mb-8 text-gray-100">Study Kanji</h1>
         <StudyClient 
           initialFlashcard={initialCard} 
-          totalDueCards={totalDueCards}
+          totalDueCards={dueCount}
         />
       </div>
     </div>

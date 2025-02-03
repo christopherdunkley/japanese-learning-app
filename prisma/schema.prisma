@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,15 +9,20 @@ datasource db {
 
 model Flashcard {
   id          String   @id @default(cuid())
-  character   String   // The kanji/kana character(s)
-  onyomi      String?  // Chinese-derived reading (for kanji only)
-  kunyomi     String?  // Japanese-derived reading (for kanji only)
-  meaning     String   // English meaning
-  type        CardType // Kanji, Hiragana, or Katakana
+  character   String
+  onyomi      String?
+  kunyomi     String?
+  meaning     String
+  type        CardType
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
+  
+  // New fields
+  lastReviewedAt DateTime?
+  nextReviewAt   DateTime?
+  reviewCount    Int       @default(0)
+  currentInterval Int?
+  
   reviews     Review[]
 }
 
