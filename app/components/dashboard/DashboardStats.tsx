@@ -69,7 +69,7 @@ export function DashboardStats() {
           <p className="text-2xl font-bold">{stats.totalCards}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Cards Studied in Last Session</p>
+          <p className="text-sm text-gray-400">Cards Reviewed in Last Session</p>
           <p className="text-2xl font-bold">{stats.cardsLearned}</p>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg">
