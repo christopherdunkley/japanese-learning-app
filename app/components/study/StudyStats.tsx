@@ -86,11 +86,11 @@ export function StudyStats({ sessionId, showOverall = false }: StudyStatsProps) 
       {overallStats && (
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Total Cards Encountered</h3>
+            <h3 className="text-gray-400 text-sm">Total Reviews Completed</h3>
             <p className="text-2xl font-bold text-white">{overallStats.totalCards}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm">Cards Studied This Session</h3>
+            <h3 className="text-gray-400 text-sm">Cards Reviewed This Session</h3>
             <p className="text-2xl font-bold text-white">{overallStats.cardsLearned}</p>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg">
