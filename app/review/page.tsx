@@ -1,24 +1,30 @@
-import { StudyClient } from '@/components/study/StudyClient'
+import { ReviewClient } from '@/components/review/ReviewClient'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export default async function StudyPage() {
+export default async function ReviewPage() {
   const now = new Date()
 
+  // Get count of cards due for review (excluding new cards)
   const dueCount = await prisma.flashcard.count({
     where: {
-      OR: [
-        { nextReviewAt: null },
+      AND: [
+        // Has been reviewed before
+        { reviews: { some: {} } },
+        // Is due for review
         { nextReviewAt: { lte: now } }
       ]
     }
   })
 
+  // Get first due card
   const initialCard = await prisma.flashcard.findFirst({
     where: {
-      OR: [
-        { nextReviewAt: null },
+      AND: [
+        // Has been reviewed before
+        { reviews: { some: {} } },
+        // Is due for review
         { nextReviewAt: { lte: now } }
       ]
     }
@@ -37,8 +43,8 @@ export default async function StudyPage() {
   return (
     <div className="min-h-screen bg-gray-900 py-12">
       <div className="container mx-auto px-4">
-        <h1 className="text-2xl font-bold text-center mb-8 text-gray-100">Study Kanji</h1>
-        <StudyClient 
+        <h1 className="text-2xl font-bold text-center mb-8 text-gray-100">Review Kanji</h1>
+        <ReviewClient 
           initialFlashcard={initialCard} 
           totalDueCards={dueCount}
         />

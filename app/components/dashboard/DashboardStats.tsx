@@ -11,33 +11,46 @@ interface Stats {
   currentStreak: number
 }
 
+interface DueCounts {
+  learnCount: number
+  reviewCount: number
+  totalNewCards: number
+}
+
 export function DashboardStats() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [dueCount, setDueCount] = useState(0)
+  const [dueCounts, setDueCounts] = useState<DueCounts>({
+    learnCount: 0,
+    reviewCount: 0,
+    totalNewCards: 0
+  })
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const response = await fetch('/api/stats/overall')
-        if (!response.ok) throw new Error('Failed to fetch stats')
-        const data = await response.json()
-        setStats(data)
+        const [statsResponse, dueCountResponse] = await Promise.all([
+          fetch('/api/stats/overall'),
+          fetch('/api/stats/due-count')
+        ])
+
+        if (!statsResponse.ok || !dueCountResponse.ok) {
+          throw new Error('Failed to fetch data')
+        }
+
+        const statsData = await statsResponse.json()
+        const dueData = await dueCountResponse.json()
+
+        setStats(statsData)
+        setDueCounts(dueData)
       } catch (error) {
-        console.error('Error fetching stats:', error)
+        console.error('Error fetching data:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
-    async function fetchDueCount() {
-      const res = await fetch('/api/stats/due-count')
-      const data = await res.json()
-      setDueCount(data.count)
-    }
-
-    fetchStats()
-    fetchDueCount()
+    fetchData()
   }, [])
 
   if (isLoading) {
@@ -84,12 +97,23 @@ export function DashboardStats() {
           </div>
         </div>
 
-        <Link
-          href="/study"
-          className="mt-4 w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-        >
-          Start Studying ({dueCount}) →
-        </Link>
+        <div className="mt-4 space-y-2">
+          <Link
+            href="/learn"
+            className={`w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-green-600 hover:bg-green-700 text-white gap-2 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 ${dueCounts.learnCount === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            {...(dueCounts.learnCount === 0 ? { 'aria-disabled': true } : {})}
+          >
+            Learn New Cards ({dueCounts.learnCount}) →
+          </Link>
+          
+          <Link
+            href="/review"
+            className={`w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white gap-2 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 ${dueCounts.reviewCount === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            {...(dueCounts.reviewCount === 0 ? { 'aria-disabled': true } : {})}
+          >
+            Review Cards ({dueCounts.reviewCount}) →
+          </Link>
+        </div>
       </div>
 
       <ReviewForecast />

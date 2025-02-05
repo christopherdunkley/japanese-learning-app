@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Flashcard } from '../flashcards/Flashcard'
-import { StudyStats } from './StudyStats'
-import { ProgressBar } from './ProgressBar'
+import { Flashcard } from '@/components/flashcards/Flashcard'
+import { StudyStats } from '@/components/review/StudyStats'
+import { ProgressBar } from '@/components/review/ProgressBar'
 import type { Flashcard as FlashcardType } from '@prisma/client'
 
-interface StudyClientProps {
+interface ReviewClientProps {
   initialFlashcard: FlashcardType
   totalDueCards: number
 }
 
-export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProps) {
+export function ReviewClient({ initialFlashcard, totalDueCards }: ReviewClientProps) {
   const [currentCard, setCurrentCard] = useState<FlashcardType | null>(initialFlashcard)
   const [isLoading, setIsLoading] = useState(false)
   const [isDone, setIsDone] = useState(false)
@@ -40,7 +40,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
     }
   }
 
-  // Initialise session if we don't have one
+  // Initialize session if we don't have one
   if (!sessionId && !isDone) {
     createSession()
   }
@@ -75,8 +75,8 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
         return Math.min(prev + 1, totalDueCards)
       })
 
-      // Get next card
-      const nextCardResponse = await fetch(`/api/flashcards/next?sessionId=${sessionId}`)
+      // Get next card in review mode
+      const nextCardResponse = await fetch(`/api/flashcards/next?sessionId=${sessionId}&mode=review`)
       
       if (nextCardResponse.status === 404) {
         // Complete the session
@@ -104,7 +104,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
   }
 
   const handleStartNewSession = () => {
-    if (window.confirm('Are you sure you want to start a new session? Your current session stats will be lost.')) {
+    if (window.confirm('Are you sure you want to start a new review session?')) {
       window.location.reload()
     }
   }
@@ -119,13 +119,13 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
         <div className="text-center text-gray-400">Loading next card...</div>
       ) : isDone ? (
         <div className="text-center text-gray-200">
-          <h2 className="text-xl font-bold mb-4">Session Complete! 🎉</h2>
+          <h2 className="text-xl font-bold mb-4">Review Complete! 🎉</h2>
           <StudyStats sessionId={sessionId} showOverall={true} />
           <button 
             onClick={handleStartNewSession}
             className="mt-8 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
           >
-            Start New Session
+            Start New Review Session
           </button>
         </div>
       ) : currentCard ? (
@@ -137,7 +137,7 @@ export function StudyClient({ initialFlashcard, totalDueCards }: StudyClientProp
           onResult={handleResult}
         />
       ) : (
-        <div className="text-center text-gray-200">No cards available.</div>
+        <div className="text-center text-gray-200">No cards due for review.</div>
       )}
     </div>
   )
