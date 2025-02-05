@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "@types/recharts": "^1.8.29",
     "next": "15.1.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

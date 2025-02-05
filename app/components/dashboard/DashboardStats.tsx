@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ReviewForecast } from './ReviewForecast'
 
 interface Stats {
   totalCards: number
@@ -41,7 +42,7 @@ export function DashboardStats() {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-800 rounded-lg p-6 animate-pulse">
+      <div className="bg-gray-800 rounded-lg p-4 lg:p-6 animate-pulse">
         <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
         <div className="space-y-3">
           <div className="h-8 bg-gray-700 rounded"></div>
@@ -53,41 +54,45 @@ export function DashboardStats() {
 
   if (!stats) {
     return (
-      <div className="bg-gray-800 rounded-lg p-6">
+      <div className="bg-gray-800 rounded-lg p-4 lg:p-6">
         <p className="text-gray-400">Unable to load stats</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Learning Progress</h2>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Total Reviews Completed</p>
-          <p className="text-2xl font-bold">{stats.totalCards}</p>
+    <div className="space-y-4 lg:space-y-6">
+      <div className="bg-gray-800 rounded-lg p-4 lg:p-6">
+        <h2 className="text-xl font-semibold mb-4">Learning Progress</h2>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="bg-gray-700 p-3 lg:p-4 rounded-lg">
+            <p className="text-sm text-gray-400">Total Reviews Completed</p>
+            <p className="text-xl lg:text-2xl font-bold">{stats.totalCards}</p>
+          </div>
+          <div className="bg-gray-700 p-3 lg:p-4 rounded-lg">
+            <p className="text-sm text-gray-400">Cards Studied in Last Session</p>
+            <p className="text-xl lg:text-2xl font-bold">{stats.cardsLearned}</p>
+          </div>
+          <div className="bg-gray-700 p-3 lg:p-4 rounded-lg">
+            <p className="text-sm text-gray-400">Best Good/Easy Streak</p>
+            <p className="text-xl lg:text-2xl font-bold">{stats.bestStreak}</p>
+          </div>
+          <div className="bg-gray-700 p-3 lg:p-4 rounded-lg">
+            <p className="text-sm text-gray-400">Current Good/Easy Streak</p>
+            <p className="text-xl lg:text-2xl font-bold">{stats.currentStreak}</p>
+          </div>
         </div>
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Cards Reviewed in Last Session</p>
-          <p className="text-2xl font-bold">{stats.cardsLearned}</p>
-        </div>
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Best Good/Easy Streak</p>
-          <p className="text-2xl font-bold">{stats.bestStreak}</p>
-        </div>
-        <div className="bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Current Good/Easy Streak</p>
-          <p className="text-2xl font-bold">{stats.currentStreak}</p>
-        </div>
+
+        <Link
+          href="/study"
+          className="mt-4 w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+        >
+          Start Studying ({dueCount}) →
+        </Link>
       </div>
 
-      <Link
-        href="/study"
-        className="mt-4 w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-      >
-        Start Studying ({dueCount}) →
-      </Link>
+      <ReviewForecast />
     </div>
   )
 }
