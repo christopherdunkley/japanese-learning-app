@@ -16,11 +16,7 @@ export async function GET() {
         }
       },
       include: {
-        reviews: {
-          orderBy: {
-            reviewedAt: 'desc'
-          }
-        }
+        reviews: true
       },
       orderBy: {
         endedAt: 'desc'
@@ -32,25 +28,50 @@ export async function GET() {
       ? new Set(lastSession.reviews.map(r => r.flashcardId)).size 
       : 0
 
-    // Calculate streak from session's reviews
-    let currentStreak = 0
+    // Get all sessions with their reviews, ordered by time
+    const allSessions = await prisma.session.findMany({
+      include: {
+        reviews: {
+          orderBy: {
+            reviewedAt: 'asc'
+          }
+        }
+      },
+      orderBy: {
+        startedAt: 'asc'
+      }
+    })
+
+    // Calculate best streak by session
     let bestStreak = 0
     let tempStreak = 0
 
-    if (lastSession?.reviews) {
-      lastSession.reviews.reverse().forEach(review => {  // Process in chronological order
+    allSessions.forEach(session => {
+      const uniqueGoodCards = new Set()
+      session.reviews.forEach(review => {
         if (review.result === 'GOOD' || review.result === 'EASY') {
-          tempStreak++
-          currentStreak = tempStreak
-          bestStreak = Math.max(bestStreak, tempStreak)
-        } else {
-          tempStreak = 0
+          uniqueGoodCards.add(review.flashcardId)
         }
       })
+      
+      tempStreak = uniqueGoodCards.size
+      bestStreak = Math.max(bestStreak, tempStreak)
+    })
+
+    // Calculate current streak from last session
+    let currentStreak = 0
+    if (lastSession) {
+      const uniqueGoodCards = new Set()
+      lastSession.reviews.forEach(review => {
+        if (review.result === 'GOOD' || review.result === 'EASY') {
+          uniqueGoodCards.add(review.flashcardId)
+        }
+      })
+      currentStreak = uniqueGoodCards.size
     }
 
     return NextResponse.json({
-      totalCards: totalReviews,  // total number of reviews (including repeated cards)
+      totalCards: totalReviews,
       cardsLearned: cardsStudied,
       bestStreak,
       currentStreak
