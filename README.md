@@ -3,18 +3,25 @@
 A modern Japanese learning application built with Next.js 14, featuring interactive kanji flashcards and spaced repetition.
 
 ## Features
+- Separate Learn and Review modes for optimal study progression:
+  - Learn Mode introduces 3 new kanji per session
+  - Review Mode uses spaced repetition for previously learned cards
 - Interactive kanji flashcards w/ smooth 3D flip animations
 - Shows both onyomi (音読み) and kunyomi (訓読み) readings
-- Spaced repetition system (SRS) for efficient learning
-- Progress tracking w/ visual indicators
+- Advanced spaced repetition system (SRS) for efficient learning
+- Progress tracking w/ visual indicators and forecast charts
+- Interactive session graphs w/ canvas/SVG hybrid visualization
+- 7-day review forecast showing upcoming study load
+- Recent sessions overview w/ performance visualization
 - Session statistics and learning analytics
 - End-of-session performance summary
-- Dark theme modern UI
+- Dark theme modern UI w/ custom animations
 - Built with TypeScript for type safety
 - Comprehensive session statistics including:
   - Cards reviewed per session
   - Review quality tracking (Again/Hard/Good/Easy)
-  - Current and best streaks
+  - Current and best Good/Easy streaks
+  - Total cards encountered vs reviews completed
   - Session completion summaries
 
 ## Tech Stack
@@ -23,6 +30,7 @@ A modern Japanese learning application built with Next.js 14, featuring interact
 - Prisma ORM
 - Tailwind CSS
 - SQLite
+- Hybrid Canvas/SVG for performance visualizations
 
 ## Getting Started
 
@@ -82,6 +90,9 @@ This opens a GUI at http://localhost:5555 where you can:
 CAUTION: Running `npm run seed` will clear all existing review data and recreate the flashcard deck.
 
 ### Study Interface
+- Two distinct study modes:
+  - Learn Mode for new cards (3 per session)
+  - Review Mode for practicing known cards
 - Click cards or press spacebar to flip between kanji / readings
 - Rate your recall using keyboard shortcuts or buttons:
   - 1 or click "Again" - Don't remember at all (review in 1 hour)
@@ -105,12 +116,22 @@ CAUTION: Running `npm run seed` will clear all existing review data and recreate
   - Learning streaks
   - Overall progress
 
-### Statistics Tracking
-The app tracks various metrics to help monitor your learning:
-- **Cards Learned**: Number of unique cards reviewed in current session
-- **Review Quality**: Distribution of Again/Hard/Good/Easy ratings
-- **Best Streak**: Highest consecutive Good/Easy ratings
-- **Current Streak**: Recent consecutive Good/Easy ratings
+### Statistics and Analytics
+The app tracks various metrics with interactive visualizations:
+- Dashboard Overview:
+  - 7-day review forecast chart
+  - Total cards encountered vs reviews completed
+  - Recent study sessions with performance graphs
+- Session Stats:
+  - Performance visualization using canvas/SVG hybrid approach
+  - Color-coded result indicators (Easy/Good/Hard/Again)
+  - Success rate calculation
+  - Session-by-session trend analysis
+- Learning Progress:
+  - Cards studied this session
+  - Review quality distribution
+  - Best and current Good/Easy streaks
+  - Total review completion tracking
 
 Review data persists between sessions, allowing you to track your progress over time.
 
@@ -120,9 +141,12 @@ japanese-learning-app/
 ├── app/
 │   ├── api/              # API routes
 │   ├── components/       # React components
+│   │   ├── dashboard/    # Dashboard & analytics
 │   │   ├── flashcards/   # Flashcard components
-│   │   └── study/       # Study interface
-│   └── study/           # Study page
+│   │   ├── learn/        # Learn mode interface
+│   │   └── review/       # Review mode interface
+│   ├── learn/           # Learn page
+│   └── review/          # Review page
 ├── prisma/
 │   ├── schema.prisma    # Database schema
 │   └── seed.ts         # Seed data for flashcards
